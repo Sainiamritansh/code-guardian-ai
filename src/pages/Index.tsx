@@ -27,63 +27,45 @@ const Index = () => {
         <HeroBackground />
         <div className="container mx-auto px-4 py-20 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Floating badge with glow effect */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-sm mb-8 animate-float backdrop-blur-sm shadow-[0_0_30px_hsl(var(--primary)/0.2)]">
-              <Cpu className="w-4 h-4 animate-pulse" />
-              <span className="font-medium tracking-wide">Powered by Advanced ML Models</span>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-              </span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-8">
+              <Cpu className="w-4 h-4" />
+              <span>Powered by Advanced ML Models</span>
             </div>
 
-            {/* Main heading with enhanced typography */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[0.95] tracking-tight">
-              <span className="block text-foreground drop-shadow-[0_0_35px_hsl(var(--primary)/0.3)]">Catch Vulnerabilities</span>
-              <span className="block gradient-text mt-2 animate-glow">Before Hackers Do</span>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Catch Vulnerabilities
+              <br />
+              <span className="gradient-text">Before Hackers Do</span>
             </h1>
 
-            {/* Subheading with glassmorphism card */}
-            <div className="relative max-w-2xl mx-auto mb-12">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 blur-xl" />
-              <p className="relative text-lg md:text-xl text-muted-foreground leading-relaxed backdrop-blur-sm bg-card/30 rounded-xl px-6 py-4 border border-border/50">
-                AI-powered static analysis that detects bugs, security flaws, and
-                poor practices in your code — then suggests{" "}
-                <span className="text-primary font-semibold">context-aware fixes</span>{" "}
-                automatically.
-              </p>
-            </div>
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+              AI-powered static analysis that detects bugs, security flaws, and
+              poor practices in your code — then suggests context-aware fixes
+              automatically.
+            </p>
 
-            {/* CTA buttons with enhanced styling */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
-              <Button variant="hero" size="xl" className="group shadow-[0_0_40px_hsl(var(--primary)/0.3)] hover:shadow-[0_0_60px_hsl(var(--primary)/0.5)] transition-all duration-300">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button variant="hero" size="xl">
                 Start Free Analysis
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button variant="heroOutline" size="xl" className="group backdrop-blur-sm">
-                <Terminal className="w-5 h-5 group-hover:text-primary transition-colors" />
+              <Button variant="heroOutline" size="xl">
+                <Terminal className="w-5 h-5" />
                 View CLI Docs
               </Button>
             </div>
 
-            {/* Trust badges with improved layout */}
-            <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-success" />
-                </div>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-success" />
                 <span>Free for open source</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-success" />
-                </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-success" />
                 <span>No credit card required</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-                <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-success" />
-                </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-success" />
                 <span>SOC 2 compliant</span>
               </div>
             </div>
