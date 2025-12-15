@@ -45,13 +45,13 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button variant="hero" size="xl">
+              <Button variant="hero" size="xl" onClick={() => window.location.href = '/auth'}>
                 Start Free Analysis
                 <ArrowRight className="w-5 h-5" />
               </Button>
-              <Button variant="heroOutline" size="xl">
+              <Button variant="heroOutline" size="xl" onClick={() => window.location.href = '/dashboard'}>
                 <Terminal className="w-5 h-5" />
-                View CLI Docs
+                Go to Dashboard
               </Button>
             </div>
 
