@@ -1,1 +1,4 @@
 project_id = "rbrcejedkpuafqmhsxzb"
+
+[functions.analyze-code]
+verify_jwt = true
