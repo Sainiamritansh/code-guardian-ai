@@ -161,6 +161,74 @@ function runStaticChecks(code: string): { issues: StaticCheck[]; lines: number[]
   return results;
 }
 
+// Confidence scoring based on detection method agreement
+type ConfidenceLevel = 'High' | 'Medium' | 'Low';
+
+interface IssueWithConfidence {
+  type: string;
+  severity: string;
+  title: string;
+  description: string;
+  line?: number;
+  fix: string;
+  source: 'static' | 'ai';
+  confidence: ConfidenceLevel;
+  confidence_reason: string;
+  detection_methods: string[];
+}
+
+function calculateConfidence(
+  issue: any,
+  staticIssues: any[],
+  aiIssues: any[]
+): { confidence: ConfidenceLevel; reason: string; methods: string[] } {
+  const issueTitle = issue.title?.toLowerCase() || '';
+  const issueType = issue.type?.toLowerCase() || '';
+  
+  // Check if this issue was detected by static analysis
+  const staticMatch = staticIssues.find(s => 
+    s.title?.toLowerCase().includes(issueTitle.split(' ')[0]) ||
+    issueTitle.includes(s.title?.toLowerCase().split(' ')[0] || '') ||
+    s.type === issueType
+  );
+  
+  // Check if this issue was detected by AI
+  const aiMatch = aiIssues.find(a => 
+    a.title?.toLowerCase().includes(issueTitle.split(' ')[0]) ||
+    issueTitle.includes(a.title?.toLowerCase().split(' ')[0] || '') ||
+    a.type === issueType
+  );
+  
+  const methods: string[] = [];
+  if (staticMatch || issue.source === 'static') methods.push('Static Pattern Match');
+  if (aiMatch || issue.source === 'ai') methods.push('AI Reasoning');
+  
+  // Static + AI agreement → High confidence
+  if (methods.length >= 2 || (staticMatch && aiMatch)) {
+    return {
+      confidence: 'High',
+      reason: 'Detected by both static analysis and AI reasoning, indicating high reliability.',
+      methods: ['Static Pattern Match', 'AI Reasoning']
+    };
+  }
+  
+  // Static only → Medium confidence
+  if (issue.source === 'static' || (staticMatch && !aiMatch)) {
+    return {
+      confidence: 'Medium',
+      reason: 'Detected by static pattern matching only; may require manual verification.',
+      methods: ['Static Pattern Match']
+    };
+  }
+  
+  // AI-only reasoning → Low confidence
+  return {
+    confidence: 'Low',
+    reason: 'Detected by AI reasoning only; recommend code review for confirmation.',
+    methods: ['AI Reasoning']
+  };
+}
+
 function getExplanationPrompt(level: 'junior' | 'senior' | 'lead'): string {
   switch (level) {
     case 'junior':
@@ -350,17 +418,39 @@ Respond in JSON format:
       };
     }
 
-    // Combine static and AI issues
-    const allIssues = [
-      ...staticIssues.map(i => ({ ...i, source: 'static' })),
-      ...(analysis.issues || []).map((i: any) => ({ ...i, source: 'ai' }))
-    ];
+    // Combine static and AI issues with confidence scoring
+    const staticIssuesWithSource = staticIssues.map(i => ({ ...i, source: 'static' as const }));
+    const aiIssuesWithSource = (analysis.issues || []).map((i: any) => ({ ...i, source: 'ai' as const }));
+    
+    const allIssues: IssueWithConfidence[] = [
+      ...staticIssuesWithSource,
+      ...aiIssuesWithSource
+    ].map(issue => {
+      const { confidence, reason, methods } = calculateConfidence(
+        issue,
+        staticIssuesWithSource,
+        aiIssuesWithSource
+      );
+      return {
+        ...issue,
+        confidence,
+        confidence_reason: reason,
+        detection_methods: methods
+      };
+    });
 
     // Calculate severity counts
     const criticalCount = allIssues.filter(i => i.severity === 'critical').length;
     const highCount = allIssues.filter(i => i.severity === 'high').length;
     const mediumCount = allIssues.filter(i => i.severity === 'medium').length;
     const lowCount = allIssues.filter(i => i.severity === 'low').length;
+
+    // Calculate confidence distribution
+    const confidenceCounts = {
+      high: allIssues.filter(i => i.confidence === 'High').length,
+      medium: allIssues.filter(i => i.confidence === 'Medium').length,
+      low: allIssues.filter(i => i.confidence === 'Low').length
+    };
 
     // Adjust score based on static findings
     let finalScore = analysis.score || 50;
@@ -377,7 +467,8 @@ Respond in JSON format:
         high: highCount,
         medium: mediumCount,
         low: lowCount
-      }
+      },
+      confidence_distribution: confidenceCounts
     };
 
     // Update usage and save to history if requested
