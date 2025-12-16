@@ -14,16 +14,285 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          last_used_at: string | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          last_used_at?: string | null
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          last_used_at?: string | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      github_integrations: {
+        Row: {
+          access_token: string | null
+          block_on_critical: boolean
+          block_threshold: number
+          created_at: string
+          id: string
+          installation_id: string
+          is_active: boolean
+          repository_full_name: string
+          updated_at: string
+          user_id: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          block_on_critical?: boolean
+          block_threshold?: number
+          created_at?: string
+          id?: string
+          installation_id: string
+          is_active?: boolean
+          repository_full_name: string
+          updated_at?: string
+          user_id: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          block_on_critical?: boolean
+          block_threshold?: number
+          created_at?: string
+          id?: string
+          installation_id?: string
+          is_active?: boolean
+          repository_full_name?: string
+          updated_at?: string
+          user_id?: string
+          webhook_secret?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          explanation_level: Database["public"]["Enums"]["explanation_level"]
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          explanation_level?: Database["public"]["Enums"]["explanation_level"]
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          explanation_level?: Database["public"]["Enums"]["explanation_level"]
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scan_feedback: {
+        Row: {
+          created_at: string
+          feedback_note: string | null
+          id: string
+          is_false_positive: boolean
+          issue_title: string
+          issue_type: Database["public"]["Enums"]["issue_type"]
+          scan_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_note?: string | null
+          id?: string
+          is_false_positive?: boolean
+          issue_title: string
+          issue_type: Database["public"]["Enums"]["issue_type"]
+          scan_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_note?: string | null
+          id?: string
+          is_false_positive?: boolean
+          issue_title?: string
+          issue_type?: Database["public"]["Enums"]["issue_type"]
+          scan_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_feedback_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scan_history: {
+        Row: {
+          code_hash: string
+          created_at: string
+          critical_count: number
+          fixed_code: string | null
+          high_count: number
+          id: string
+          issues: Json
+          issues_count: number
+          language: string
+          low_count: number
+          medium_count: number
+          score: number
+          static_checks: Json | null
+          summary: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          critical_count?: number
+          fixed_code?: string | null
+          high_count?: number
+          id?: string
+          issues?: Json
+          issues_count?: number
+          language: string
+          low_count?: number
+          medium_count?: number
+          score: number
+          static_checks?: Json | null
+          summary?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          critical_count?: number
+          fixed_code?: string | null
+          high_count?: number
+          id?: string
+          issues?: Json
+          issues_count?: number
+          language?: string
+          low_count?: number
+          medium_count?: number
+          score?: number
+          static_checks?: Json | null
+          summary?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_tracking: {
+        Row: {
+          billing_period_start: string
+          created_at: string
+          id: string
+          scans_limit: number
+          scans_this_month: number
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_period_start?: string
+          created_at?: string
+          id?: string
+          scans_limit?: number
+          scans_this_month?: number
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_period_start?: string
+          created_at?: string
+          id?: string
+          scans_limit?: number
+          scans_this_month?: number
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      explanation_level: "junior" | "senior" | "lead"
+      issue_type: "vulnerability" | "bug" | "code_smell" | "performance"
+      scan_severity: "critical" | "high" | "medium" | "low"
+      subscription_tier: "free" | "pro" | "team" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +419,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      explanation_level: ["junior", "senior", "lead"],
+      issue_type: ["vulnerability", "bug", "code_smell", "performance"],
+      scan_severity: ["critical", "high", "medium", "low"],
+      subscription_tier: ["free", "pro", "team", "enterprise"],
+    },
   },
 } as const
