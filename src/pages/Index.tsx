@@ -175,12 +175,12 @@ const Index = () => {
                   vulnerabilities before they become breaches.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="hero" size="lg">
+                  <Button variant="hero" size="lg" onClick={() => window.location.href = '/auth'}>
                     Start Free Trial
                     <ArrowRight className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="lg">
-                    Schedule Demo
+                  <Button variant="outline" size="lg" onClick={() => window.location.href = '/pricing'}>
+                    View Pricing
                   </Button>
                 </div>
               </div>

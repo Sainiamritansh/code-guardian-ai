@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,10 @@ import {
   Info,
   Loader2,
   Code2,
+  History,
+  Settings,
+  CreditCard,
+  Zap,
 } from "lucide-react";
 
 interface Issue {
@@ -31,6 +36,7 @@ interface Issue {
   line?: number;
   description: string;
   fix: string;
+  source?: string;
 }
 
 interface AnalysisResult {
@@ -38,6 +44,18 @@ interface AnalysisResult {
   issues: Issue[];
   fixed_code?: string;
   score: number;
+  severity_counts?: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+}
+
+interface UsageData {
+  scans_this_month: number;
+  scans_limit: number;
+  subscription_tier: string;
 }
 
 const LANGUAGES = [
@@ -66,6 +84,8 @@ const Dashboard = () => {
   const [language, setLanguage] = useState("javascript");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [explanationLevel, setExplanationLevel] = useState<string>("senior");
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -75,6 +95,37 @@ const Dashboard = () => {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUsage();
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchUsage = async () => {
+    const { data } = await supabase
+      .from("usage_tracking")
+      .select("scans_this_month, scans_limit, subscription_tier")
+      .eq("user_id", user?.id)
+      .single();
+    
+    if (data) {
+      setUsage(data);
+    }
+  };
+
+  const fetchProfile = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("explanation_level")
+      .eq("user_id", user?.id)
+      .single();
+    
+    if (data?.explanation_level) {
+      setExplanationLevel(data.explanation_level);
+    }
+  };
 
   const handleAnalyze = async () => {
     if (!code.trim()) {
@@ -86,12 +137,27 @@ const Dashboard = () => {
       return;
     }
 
+    if (usage && usage.scans_this_month >= usage.scans_limit) {
+      toast({
+        title: "Limit Reached",
+        description: "You've reached your monthly scan limit. Upgrade for more scans.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     setResult(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-code", {
-        body: { code, language },
+        body: { 
+          code, 
+          language, 
+          userId: user?.id,
+          saveToHistory: true,
+          explanationLevel 
+        },
       });
 
       if (error) {
@@ -103,6 +169,8 @@ const Dashboard = () => {
       }
 
       setResult(data);
+      fetchUsage(); // Refresh usage count
+      
       toast({
         title: "Analysis Complete",
         description: `Found ${data.issues?.length || 0} issues. Score: ${data.score}/100`,
@@ -157,18 +225,46 @@ const Dashboard = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg">CodeGuard AI</h1>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg">CodeGuard AI</h1>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+            </Link>
           </div>
-          <Button variant="ghost" onClick={handleSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            {/* Usage indicator */}
+            {usage && (
+              <Badge variant="outline" className="hidden sm:flex gap-1">
+                <Zap className="h-3 w-3" />
+                {usage.scans_this_month}/{usage.scans_limit} scans
+              </Badge>
+            )}
+            
+            <Link to="/history">
+              <Button variant="ghost" size="icon" title="Scan History">
+                <History className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to="/settings">
+              <Button variant="ghost" size="icon" title="Settings">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link to="/pricing">
+              <Button variant="ghost" size="icon" title="Pricing">
+                <CreditCard className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Button variant="ghost" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -177,23 +273,35 @@ const Dashboard = () => {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Code Input */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Code2 className="w-5 h-5 text-primary" />
                 Code Input
               </h2>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map((lang) => (
-                    <SelectItem key={lang.value} value={lang.value}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select value={explanationLevel} onValueChange={setExplanationLevel}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="junior">Junior</SelectItem>
+                    <SelectItem value="senior">Senior</SelectItem>
+                    <SelectItem value="lead">Lead</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="gradient-border rounded-xl overflow-hidden">
@@ -215,9 +323,8 @@ const Dashboard = () => {
 
             <Button
               onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              variant="hero"
-              className="w-full"
+              disabled={isAnalyzing || (usage !== null && usage.scans_this_month >= usage.scans_limit)}
+              className="w-full bg-primary hover:bg-primary/90"
             >
               {isAnalyzing ? (
                 <>
@@ -231,6 +338,12 @@ const Dashboard = () => {
                 </>
               )}
             </Button>
+            
+            {usage && usage.scans_this_month >= usage.scans_limit && (
+              <p className="text-sm text-destructive text-center">
+                Monthly limit reached. <Link to="/pricing" className="underline">Upgrade</Link> for more scans.
+              </p>
+            )}
           </div>
 
           {/* Results */}
@@ -268,6 +381,29 @@ const Dashboard = () => {
                       {result.score}/100
                     </span>
                   </div>
+                  
+                  {/* Severity breakdown */}
+                  {result.severity_counts && (
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      <div className="text-center p-2 bg-destructive/10 rounded">
+                        <p className="text-lg font-bold text-destructive">{result.severity_counts.critical}</p>
+                        <p className="text-xs text-muted-foreground">Critical</p>
+                      </div>
+                      <div className="text-center p-2 bg-warning/10 rounded">
+                        <p className="text-lg font-bold text-warning">{result.severity_counts.high}</p>
+                        <p className="text-xs text-muted-foreground">High</p>
+                      </div>
+                      <div className="text-center p-2 bg-primary/10 rounded">
+                        <p className="text-lg font-bold text-primary">{result.severity_counts.medium}</p>
+                        <p className="text-xs text-muted-foreground">Medium</p>
+                      </div>
+                      <div className="text-center p-2 bg-muted rounded">
+                        <p className="text-lg font-bold text-muted-foreground">{result.severity_counts.low}</p>
+                        <p className="text-xs text-muted-foreground">Low</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   <p className="text-sm text-muted-foreground">{result.summary}</p>
                 </div>
 
@@ -290,6 +426,9 @@ const Dashboard = () => {
                               <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                                 {issue.type}
                               </span>
+                              {issue.source === 'static' && (
+                                <Badge variant="outline" className="text-xs">Static</Badge>
+                              )}
                               {issue.line && (
                                 <span className="text-xs text-muted-foreground">
                                   Line {issue.line}
