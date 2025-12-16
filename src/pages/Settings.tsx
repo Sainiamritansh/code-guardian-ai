@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
-  ArrowLeft, Settings as SettingsIcon, User, Key, Github, 
-  Copy, Plus, Trash2, RefreshCw, Eye, EyeOff, AlertTriangle 
+  ArrowLeft, Settings as SettingsIcon, User, Key, Github, Shield, EyeOff,
+  Copy, Plus, Trash2, Eye, AlertTriangle 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PolicyManager from "@/components/PolicyManager";
+import SuppressionManager from "@/components/SuppressionManager";
 
 interface ApiKey {
   id: string;

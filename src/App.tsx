@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import ScanHistory from "./pages/ScanHistory";
 import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
+import SharedReport from "./pages/SharedReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,7 +29,7 @@ const App = () => (
             <Route path="/history" element={<ScanHistory />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/pricing" element={<Pricing />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/shared/:token" element={<SharedReport />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

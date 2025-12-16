@@ -119,6 +119,44 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_baselines: {
+        Row: {
+          baseline_scan_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          issue_hashes: string[] | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          baseline_scan_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          issue_hashes?: string[] | null
+          name?: string
+          user_id: string
+        }
+        Update: {
+          baseline_scan_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          issue_hashes?: string[] | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_baselines_baseline_scan_id_fkey"
+            columns: ["baseline_scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scan_feedback: {
         Row: {
           created_at: string
@@ -166,6 +204,7 @@ export type Database = {
           created_at: string
           critical_count: number
           fixed_code: string | null
+          fixed_issues_count: number | null
           high_count: number
           id: string
           issues: Json
@@ -173,16 +212,22 @@ export type Database = {
           language: string
           low_count: number
           medium_count: number
+          new_issues_count: number | null
+          policy_id: string | null
+          policy_passed: boolean | null
+          previous_scan_id: string | null
           score: number
           static_checks: Json | null
           summary: string | null
           user_id: string
+          vulnerability_hashes: string[] | null
         }
         Insert: {
           code_hash: string
           created_at?: string
           critical_count?: number
           fixed_code?: string | null
+          fixed_issues_count?: number | null
           high_count?: number
           id?: string
           issues?: Json
@@ -190,16 +235,22 @@ export type Database = {
           language: string
           low_count?: number
           medium_count?: number
+          new_issues_count?: number | null
+          policy_id?: string | null
+          policy_passed?: boolean | null
+          previous_scan_id?: string | null
           score: number
           static_checks?: Json | null
           summary?: string | null
           user_id: string
+          vulnerability_hashes?: string[] | null
         }
         Update: {
           code_hash?: string
           created_at?: string
           critical_count?: number
           fixed_code?: string | null
+          fixed_issues_count?: number | null
           high_count?: number
           id?: string
           issues?: Json
@@ -207,9 +258,148 @@ export type Database = {
           language?: string
           low_count?: number
           medium_count?: number
+          new_issues_count?: number | null
+          policy_id?: string | null
+          policy_passed?: boolean | null
+          previous_scan_id?: string | null
           score?: number
           static_checks?: Json | null
           summary?: string | null
+          user_id?: string
+          vulnerability_hashes?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_history_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "security_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scan_history_previous_scan_id_fkey"
+            columns: ["previous_scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_policies: {
+        Row: {
+          created_at: string
+          id: string
+          ignore_paths: string[] | null
+          is_active: boolean
+          max_critical: number
+          max_high: number
+          max_low: number | null
+          max_medium: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ignore_paths?: string[] | null
+          is_active?: boolean
+          max_critical?: number
+          max_high?: number
+          max_low?: number | null
+          max_medium?: number
+          name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ignore_paths?: string[] | null
+          is_active?: boolean
+          max_critical?: number
+          max_high?: number
+          max_low?: number | null
+          max_medium?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shared_reports: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          scan_id: string
+          share_token: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          scan_id: string
+          share_token: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          scan_id?: string
+          share_token?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_reports_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scan_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppression_rules: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          file_path: string | null
+          id: string
+          is_active: boolean
+          issue_title: string | null
+          issue_type: string
+          reason: string | null
+          scope: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean
+          issue_title?: string | null
+          issue_type: string
+          reason?: string | null
+          scope?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          file_path?: string | null
+          id?: string
+          is_active?: boolean
+          issue_title?: string | null
+          issue_type?: string
+          reason?: string | null
+          scope?: string
           user_id?: string
         }
         Relationships: []
